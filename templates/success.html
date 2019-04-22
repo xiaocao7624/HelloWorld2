@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}"
+          crossorigin="anonymous">
+    <link rel="stylesheet"  href="{{ url_for('static', filename='css/all.css') }}" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" crossorigin="anonymous">
+<link type="text/css" rel="stylesheet" href="${ctx}/components/fileinput/css/fileinput.css" />
+    <script type="text/javascript" src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
+
+</head>
+
+<body>
+<div class="jFiler-input-dragDrop"  onclick="choosefile()">
+    <div class="jFiler-input-inner">
+        <div class="jFiler-input-icon"><i class="fa fa-folder-open" aria-hidden="true"></i></div>
+        <div class="jFiler-input-text"><h3>Click on this box</h3>
+        <a class="jFiler-input-choose-btn blue-light">Browse Files</a>
+        </div>
+       <input type="file" id="file" style="display: none"/>
+    </div>
+    </div>
+<div class="progress" id="progress" style="width:50%;margin: 0 0 0 26%">
+    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100"
+         aria-valuemin="0" aria-valuemax="100"></div>
+</div>
+
+<div class="file-preview">
+    <div class="file-list">
+        <table class="table-bordered">
+        {% if file_list.length==0 %}
+            {% for file in file_list %}
+            <tr>
+                {% if file.type=='file' and (file.name.split(".")[1]=='jpg' or file.name.split(".")[1]=='png') %}
+                <td class="kv-file-content">
+                    <img src="{{ url_for('static', filename= './images/'+file.name,_t=val1) }}"
+                         title="{{ file.name }}" alt="{{ file.name }}"
+                         style="width:auto;height:60px;max-width:100%;max-height:100%;">
+                </td>
+                    {% else %}
+                    <td class="kv-file-content">
+                       <i class="fas fa-folder" aria-hidden="true"></i>
+                    </td>
+                {% endif %}
+                <td class="file-details-cell">
+                    <div class="explorer-caption" title="{{ file.name }}">{{ file.name }}</div>
+                    <samp>({{ file.size }})KB</samp>
+                </td>
+                <td class="file-actions-cell"><span title="Move / Rearrange">
+                     <i class="fas fa-arrows-alt"></i></span>
+                    <div>
+                        <button type="button" class="btn btn-sm"  title="删除" onclick="delete_file('{{ file.name }}')"  data-url="{$url}"
+                                data-key="1"><i class="fas fa-trash-alt" ></i></button>
+
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <h2 style="padding-top: 2%;color:gray">暂无资源</h2>
+            {% endif %}
+        </table>
+    </div>
+
+
+
+</div>
+</div>
+<script>
+    let reader = new FileReader();
+    let loaded = 0
+    let total = 0
+    const xhr = new XMLHttpRequest();
+    function choosefile(){
+        const f=document.getElementById("file")
+        f.click()
+    }
+    function delete_file(name){
+        $.ajax(
+             {   type:"post",
+                 url:"/delete",
+                 data:{"name":name},
+                 async:true,
+                 success:function(data){
+                     window.location.reload();
+                     alert('删除成功')
+                 },
+
+             }
+         )
+    }
+    file.onchange = function () {
+        //获取文件对象
+        const file = this.files[0];
+        total = file.size;
+        const step = 1024 * 1024 * 3;
+        const shardCount = Math.ceil(total / step); //总片数
+        let no = 0
+        const startTime = new Date();
+        //读取一段成功
+        reader.onload = function (e) {
+            //处理读取的结果(每片的字节)
+            curSize = e.loaded;
+            //将分段数据上传到服务器
+            uploadFile(reader.result, loaded, function () {
+                //如果没有读完，继续
+                if (loaded < total) {
+                    no++;
+                    readBlob(loaded);
+                } else {
+                    console.log('总共用时：' + (new Date().getTime() - startTime.getTime()) / 1000);
+                    loaded = total;
+                }
+            });
+        }
+        reader.onprogress = function (e) {
+            loaded += e.loaded;
+            console.info('loaded', loaded)
+            console.info('total', total)
+            var per = loaded / total * 100 + "%";
+            $("div[role=progressbar]").width(per)
+        }
+       // reader.onloadstart=function(){
+       //     console.info("我上传前")
+       //      document.getElementById("progress").style.display="block";
+       // }
+        reader.onloadend=function () {
+             $.ajax(
+                 {   type:"get",
+                     url:"/",
+                     async:true,
+                     success:function(data){
+                     console.log('----------------:',data)
+                         window.location.reload();
+                     },
+
+                 }
+             )
+
+        }
+
+        //指定开始位置，分块读取文件
+        function readBlob(start) {
+            //指定开始位置和结束位置读取文件
+            //console.info('start:' + start);
+            const blob = file.slice(start, start + step);
+            reader.readAsArrayBuffer(blob);
+        }
+
+        //开始读取
+        readBlob(0);
+
+        //关键代码上传到服务器
+        function uploadFile(result, cuLoaded, onSuccess) {
+            const blob = new Blob([result]);
+            //提交到服务器
+            let fd = new FormData();
+            fd.append('file', blob);
+            fd.append('filename', file.name);
+            fd.append('LoadSize', (cuLoaded + curSize));
+            fd.append('totalSize', total);
+            fd.append('no', no);
+            fd.append('shardCount', shardCount);
+
+            xhr.open('post', '/upload', true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    if (onSuccess)
+                        onSuccess();
+                }
+            }
+            //开始发送
+            xhr.send(fd);
+        }
+    }
+
+</script>
+</body>
+</html>

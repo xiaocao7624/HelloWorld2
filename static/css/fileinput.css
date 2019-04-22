@@ -1,0 +1,100 @@
+/*!
+ * bootstrap-fileinput v5.0.2
+ * http://plugins.krajee.com/file-input
+ *
+ * Krajee default styling for bootstrap-fileinput.
+ *
+ * Author: Kartik Visweswaran
+ * Copyright: 2014 - 2019, Kartik Visweswaran, Krajee.com
+ *
+ * Licensed under the BSD-3-Clause
+ * https://github.com/kartik-v/bootstrap-fileinput/blob/master/LICENSE.md
+ */
+
+.file-list{
+    border: 1px dashed #aaa;
+    border-radius: 4px;
+    text-align: center;
+    vertical-align: middle;
+    margin: 12px 15px 12px 12px;
+    padding: 5px;
+}
+.table-bordered{
+    width: 100%;
+    margin-bottom: 1rem;
+    background-color: transparent;
+    border: 1px solid #dee2e6;
+    border-collapse: collapse;
+}
+.table-bordered td{
+padding:0.75rem;
+border: 1px solid #dee2e6;
+}
+.kv-file-content{
+    width: 80px;
+    height: 80px;
+    padding: 5px;
+}
+.file-details-cell{
+    text-align: left;
+}
+.theme-explorer-fas .explorer-caption {
+    color:#777;
+}
+.file-actions-cell{
+    width:9%;
+    padding:0
+}
+button_cell{
+width:120px;
+padding:0
+}
+
+.btn:not(:disabled):not(.disabled) {
+    cursor: pointer;
+}
+.jFiler-input-dragDrop{
+    display: block;
+    width: 343px;
+    margin: 0 auto 25px;
+    padding: 25px;
+    color: #8d9499;
+    background: #fff;
+    border: 2px dashed #c8cbce;
+    text-align: center;
+    transition: box-shadow 0.3s,border-color 0.3s;
+}
+.fa-folder-open:before{
+    font-size:2.5rem;
+}
+.fa-file-image-o:before{
+    font-size:2rem;
+}
+.fa-folder:before{
+    font-size:2.5rem;
+}
+jFiler-input-icon{
+font-size:48px;
+margin-top:-10px;
+transition: all .3s ease;
+}
+.jFiler-input-choose-btn{
+    display: inline-block;
+    padding: 8px 14px;
+    outline: 0;
+    cursor: pointer;
+    text-decoration: none;
+    text-align: center;
+    white-space: nowrap;
+    font-size: 12px;
+    font-weight: 700;
+    color: #8d9496;
+    border-radius: 3px;
+    border: 1px solid #c6c6c6;
+    vertical-align: middle;
+    background-color: #fff;
+    box-shadow: 0 1px 5px rgba(0,0,0,.05);
+    -webkit-transition: all .2s;
+    -moz-transition: all .2s;
+    transition: all .2s;
+}
